@@ -38,7 +38,8 @@ const notAuth = (req, res, next) =>{
 	if (userRole === 'guest') {
 		next();
 	} else {
-		res.status(401).send('Unauthorized');
+		res.redirect('dashboard')
+		
 	}
 
 }
@@ -49,7 +50,7 @@ const authenticateAdmin = (req, res, next) => {
 	if (userRole === 'admin') {
 		next();
 	} else {
-		res.redirect('dashboard')
+		res.status(401).send('Unauthorized');
 	}
 };
 
@@ -67,7 +68,7 @@ const users = [{
 ];
 
 // Login form
-app.get('/login', (req, res) => {
+app.get('/login',notAuth ,(req, res) => {
 	fs.readFile('login.html', 'utf8', (err, data) => {
 		if (err) {
 			// Handle error, e.g., send an error message
@@ -80,7 +81,7 @@ app.get('/login', (req, res) => {
 });
 
 // Login route
-app.post('/login', (req, res) => {
+app.post('/login',notAuth, (req, res) => {
 	const {
 		username,
 		password
