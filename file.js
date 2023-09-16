@@ -24,8 +24,7 @@ app.use(session({
   }
 }));
 
-// Your existing middleware and routes for session-based authentication
-// ...
+
 
 // Sample users for demonstration
 const users = [
