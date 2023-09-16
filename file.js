@@ -45,9 +45,15 @@ app.get('/login', (req, res) => {
   fs.readFile('login.html', 'utf8', (err, data) => {
     if (err) {
       res.status(500).send('Error reading login.html');
-    } else {
-      res.send(data);
-    }
+    } else if(req.session.authorization) {
+        if (req.session.role === 'admin') {
+          res.redirect('/admin');
+        } else {
+          res.redirect('/dashboard');
+        }
+      } else {
+        res.send(data);
+      }
   });
 });
 
@@ -71,7 +77,6 @@ app.post('/login', (req, res) => {
       res.redirect('/admin');
     }else{
       res.redirect('/dashboard');
-      console.log(token);
     }
 
   } else {
@@ -83,8 +88,6 @@ app.post('/login', (req, res) => {
 const checkJWT = (req, res, next) => {
   // Extract the token from the 'Authorization' header
   const token = req.session.authorization;
-  console.log("test");
-  console.log(token)
   // If no token is provided, deny access
   if (!token) return res.status(401).send('Access Denied');
 
