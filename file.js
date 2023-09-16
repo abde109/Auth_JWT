@@ -62,7 +62,9 @@ app.post('/login', (req, res) => {
 
     // Generate a JWT token for the user
     const token = jwt.sign({ id: user.username, role: user.role }, 'Arkx_key');
-    res.setHeader('Authorization', token);
+    res.set('Authorization', token);
+
+    req.session.authorization = token;
     // Attach the token to the 'Authorization' header and redirect to dashboard
     //console.log(token);
     if (req.session.role === 'admin') {
@@ -80,8 +82,9 @@ app.post('/login', (req, res) => {
 // Middleware to check JWT
 const checkJWT = (req, res, next) => {
   // Extract the token from the 'Authorization' header
-  const token = req.headers;
-  //console.log(token)
+  const token = req.session.authorization;
+  console.log("test");
+  console.log(token)
   // If no token is provided, deny access
   if (!token) return res.status(401).send('Access Denied');
 
