@@ -6,7 +6,7 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken'); // Import jsonwebtoken for JWT-based authentication
 
 const app = express();
-const port = 4000;
+const port = 30000;
 
 const role_path = {
   'admin': ['/admin'],
@@ -31,7 +31,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: {
-        maxAge: 36000,
+        maxAge: 6000,
     }
 }));
 
@@ -69,43 +69,50 @@ app.get('/login', (req, res) => {
 
 // Login route
 app.post('/login', (req, res) => {
+  try {
     const {
-        username,
-        password
+      username,
+      password
     } = req.body;
+
     const user = users.find(u => u.username === username && u.password === password);
 
     if (user) {
-        // Set the user's role in the session
-        req.session.role = user.role;
+      // Set the user's role in the session
+      req.session.role = user.role;
 
-        // Generate a JWT token for the user
-        const token = jwt.sign({
-            id: user.username,
-            role: user.role
-        }, 'Arkx_key');
-        res.set('Authorization', token);
+      // Generate a JWT token for the user
+      const token = jwt.sign({
+        id: user.username,
+        role: user.role
+      }, 'Arkx_key');
+      res.set('Authorization', token);
 
-        req.session.authorization = token;
-        // Attach the token to the 'Authorization' header and redirect to dashboard
-        //console.log(token);
-        if (req.session.role === 'admin') {
-            res.redirect('/admin');
-        } else {
-            res.redirect('/dashboard');
-        }
+      req.session.authorization = token;
+      // Attach the token to the 'Authorization' header and redirect to dashboard
+      //console.log(token);
+      if (req.session.role === 'admin') {
+        res.redirect('/admin');
+      } else {
+        res.redirect('/dashboard');
+      }
 
     } else {
-        // res.status(401).send('Authentication failed');
+      // res.status(401).send('Authentication failed');
 
-        fs.readFile('./pages/wrongAuth.html', 'utf8', (err, data) => {
-            if (err) {
-                res.status(500).send('Error reading wrongAuth.html');
-            } else {
-                res.send(data);
-            }
-        });
+      fs.readFile('./pages/wrongAuth.html', 'utf8', (err, data) => {
+        if (err) {
+          res.status(500).send('Error reading wrongAuth.html');
+        } else {
+          res.send(data);
+        }
+      });
     }
+
+  }catch(e){
+    console.log(e);
+  }
+    
 });
 
 
@@ -172,7 +179,12 @@ const checkJWT = (req, res, next) => {
 
                 res.status(500).send('Error reading accessDenied.html');
             } else {
+              try{
                 res.send(data);
+              }catch(e){
+                console.log('Session Expared');
+              }
+                
             }
         });
     }
