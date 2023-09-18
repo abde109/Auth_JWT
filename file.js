@@ -14,6 +14,12 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+
+const role_auth = {
+    'user' :    ['/dashboard'],
+    'admin':    ['/admin']
+}
+
 // Initialize session middleware
 app.use(session({
     secret: 'arkx',
@@ -136,8 +142,22 @@ const checkJWT = (req, res, next) => {
         req.user = verified;
 
         // Proceed to the next middleware or route handler
-        console.log(verified);
-        next();
+        if(role_auth[verified.role].includes(req.baseUrl + req.path))
+        {
+            console.log("test");
+            next();
+        }else{
+            fs.readFile('./pages/accessDenied.html', 'utf8', (err, data) => {
+                if (err) {
+    
+                    res.status(500).send('Error reading accessDenied.html');
+                } else {
+                    res.send(data);
+                }
+            });
+
+        }
+        
     } catch (err) {
         // If verification fails, deny access
         // res.status(400).send('Invalid Token');
