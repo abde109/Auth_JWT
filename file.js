@@ -8,6 +8,11 @@ const jwt = require('jsonwebtoken');  // Import jsonwebtoken for JWT-based authe
 const app = express();
 const port = 4000;
 
+const role_path = {
+  'admin': ['/admin'],
+  'user': ['/dashboard'],
+} 
+
 // Middleware for parsing JSON and URL-encoded data
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -71,6 +76,7 @@ app.post('/login', (req, res) => {
     res.set('Authorization', token);
 
     req.session.authorization = token;
+    
     // Attach the token to the 'Authorization' header and redirect to dashboard
     //console.log(token);
     if (req.session.role === 'admin') {
@@ -89,7 +95,8 @@ const checkJWT = (req, res, next) => {
   // Extract the token from the 'Authorization' header
   const token = req.session.authorization;
   // If no token is provided, deny access
-  if (!token) return res.status(401).send('Access Denied');
+  console.log(role_path[req.session.role].includes(req.originalUrl))
+  if (!token || !role_path[req.session.role].includes(req.originalUrl)) return res.status(401).send('Access Denied');
 
   try {
     // Verify the token using the secret key
